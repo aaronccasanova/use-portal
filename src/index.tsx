@@ -5,25 +5,19 @@ const isServer = typeof window === 'undefined'
 
 interface UsePortalOptions {
   /**
-   * Element to insert the Portal.
+   * Element the Portal is attached to.
    *
-   * Defaults to a 'div' element.
+   * Defaults to `document.body`.
    */
   target?: HTMLElement
   /**
-   * Element used for the Portal container.
+   * Element that wraps the child content of the Portal component.
    *
-   * Defaults to a 'div' element.
+   * Defaults to `div`.
    */
-  portal?: HTMLElement
+  container?: HTMLElement
   /**
-   * HTML Tag used for the Portal container element.
-   *
-   * Defaults to 'div'.
-   */
-  tagName?: keyof HTMLElementTagNameMap
-  /**
-   * Defines where the Portal is inserted into the target element.
+   * Defines where the Portal is inserted into the `target` element.
    *
    * Defaults to 'append'.
    */
@@ -31,55 +25,64 @@ interface UsePortalOptions {
 }
 
 export interface PortalProps {
-  children: React.ReactNode;
-  key?: string | null;
+  children: React.ReactNode
+  key?: string | null
 }
 
 export interface UsePortalReturnType {
-  Portal: (props: PortalProps) => React.ReactPortal | null;
-  portal: HTMLElement | null;
-  target: HTMLElement | null;
+  /**
+   * Portal component that renders child content into
+   * the `target` DOM element.
+   */
+  Portal: (props: PortalProps) => React.ReactPortal | null
+  /**
+   * Element the Portal is attached to.
+   *
+   * Defaults to `document.body`.
+   */
+  target: HTMLElement | null
+  /**
+   * Element that wraps the child content of the Portal component.
+   *
+   * Defaults to `div`.
+   */
+  container: HTMLElement | null
 }
 
-export function usePortal(
-  options: UsePortalOptions = {}
-): UsePortalReturnType {
-  const portal = React.useMemo<HTMLElement | null>(() => {
-    return !isServer
-      ? options.portal || document.createElement(options.tagName || 'div')
-      : null
-  }, [options.portal, options.tagName])
+export function usePortal(options: UsePortalOptions = {}): UsePortalReturnType {
+  const container = React.useMemo<HTMLElement | null>(() => {
+    return isServer ? null : options.container || document.createElement('div')
+  }, [options.container])
 
   const target = React.useMemo<null | HTMLElement>(() => {
-    return !isServer ? options.target || document.body : null
+    return isServer ? null : options.target || document.body
   }, [options.target])
 
   React.useEffect(() => {
-    if (portal && target) {
-      const insert = options.insertionOrder === 'prepend'
-        ? 'prepend'
-        : 'appendChild'
+    if (container && target) {
+      const insert =
+        options.insertionOrder === 'prepend' ? 'prepend' : 'appendChild'
 
-      target[insert](portal)
+      target[insert](container)
     }
 
     return () => {
-      if (portal && target) {
-        target.removeChild(portal)
+      if (container && target) {
+        target.removeChild(container)
       }
     }
-  }, [portal, target, options.insertionOrder])
+  }, [container, target, options.insertionOrder])
 
   const Portal = React.useCallback(
     (props: PortalProps) => {
-      if (!portal) return null
+      if (!container) return null
 
-      return ReactDOM.createPortal(props.children, portal, props.key)
+      return ReactDOM.createPortal(props.children, container, props.key)
     },
-    [portal],
+    [container],
   )
 
-  return { Portal, portal, target  }
+  return { Portal, container, target }
 }
 
 export default usePortal

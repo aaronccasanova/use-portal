@@ -1,6 +1,6 @@
 import React from 'react'
 import * as ReactDOM from 'react-dom'
-import { Default as PortalPlayground } from '../stories/basic-portal.stories'
+import { Default as PortalPlayground } from '../stories/simple-portal.stories'
 
 describe('PortalPlayground', () => {
   it('renders without crashing', () => {
