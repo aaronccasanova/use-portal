@@ -1,6 +1,6 @@
 {
   "name": "use-portal",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "React hook wrapping the React Portals API.",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
